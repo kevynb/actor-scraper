@@ -64,7 +64,7 @@ const context = {
     saveSnapshot, // Saves the full HTML of the current page to the key value store.
     skipLinks, // Prevents enqueueing more links via Pseudo URLs on the current page.
     enqueueRequest, // Adds a page to the request queue.
-    
+    getOriginalUrl, // Unwrap hidden urls (like tiny urls for example)
 }
 ```
 ## `context`

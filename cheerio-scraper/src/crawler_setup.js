@@ -1,5 +1,6 @@
 const Apify = require('apify');
 const _ = require('underscore');
+const https = require('https');
 const {
     tools,
     createContext,
@@ -210,6 +211,7 @@ class CrawlerSetup {
             ),
             pageFunctionArguments: {
                 $,
+                getOriginalUrl,
                 html,
                 autoscaledPool,
                 request,
@@ -278,6 +280,30 @@ class CrawlerSetup {
         const payload = tools.createDatasetPayload(request, response, pageFunctionResult, isError);
         await Apify.pushData(payload);
         this.pagesOutputted++;
+    }
+}
+
+async function fetchLocation(url) {
+    return new Promise((resolve, reject) => {
+        return https.request(url, { method: 'HEAD' }, (resp) => {
+            resolve(resp.headers.location);
+        }).on('error', (err) => {
+            reject(err);
+        }).end();
+    });
+}
+
+/**
+ * Try to unwrap a hidden url by fetching the location header
+ *
+ * @param {string} url the hidden url
+ * @returns {string} the real url of the hidden if it failed
+ */
+async function getOriginalUrl(url) {
+    try {
+        return await fetchLocation(url);
+    } catch (e) {
+        return url;
     }
 }
 
